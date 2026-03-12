@@ -12,8 +12,25 @@ import { routeTree } from './routeTree.gen'
 import './index.css'
 
 const theme = createTheme({
-  /** Put your mantine theme override here */
-})
+  primaryColor: 'blue',
+  primaryShade: 8,
+  defaultRadius: 'md',
+  colors: {
+    // Customizing dark colors for a more professional "charcoal" look
+    dark: [
+      '#C1C2C5',
+      '#A6A7AB',
+      '#909296',
+      '#5C5F66',
+      '#373A40',
+      '#2C2E33',
+      '#25262B',
+      '#1A1B1E',
+      '#141517',
+      '#101113',
+    ],
+  },
+});
 
 // Create a new query client
 const queryClient = new QueryClient()
@@ -33,7 +50,7 @@ if (!rootElement.innerHTML) {
   const root = createRoot(rootElement)
   root.render(
     <StrictMode>
-      <MantineProvider theme={theme} defaultColorScheme="light">
+      <MantineProvider theme={theme} defaultColorScheme="dark">
         <QueryClientProvider client={queryClient}>
           <RouterProvider router={router} />
         </QueryClientProvider>

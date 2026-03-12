@@ -7,5 +7,6 @@
 body {
   margin: 0;
   min-height: 100vh;
-  @apply bg-white text-gray-900;
+  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
+  color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
 }
