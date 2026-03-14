@@ -1,5 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { CollectorsList } from "@/features/collectors/components/CollectorsList"
+import { Group, Title, Text, Badge } from '@mantine/core';
 
 export const Route = createFileRoute('/cobradores')({
   component: Cobradores,
@@ -8,9 +9,13 @@ export const Route = createFileRoute('/cobradores')({
 function Cobradores() {
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Gestión de Cobradores</h1>
-      </div>
+      <Group justify="space-between" align="flex-start">
+        <div>
+          <Title order={2} fw={700}>Gestión de Cobradores</Title>
+          <Text c="dimmed" size="sm" mt={4}>Administra los cobradores y sus rutas</Text>
+        </div>
+      </Group>
+      
       <CollectorsList />
     </div>
   )

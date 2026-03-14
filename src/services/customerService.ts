@@ -1,5 +1,5 @@
 import api from './api';
-import { Customer } from '@/types/customer';
+import { type Customer } from '@/types/customer';
 
 // Get customers with pagination
 export const getCustomers = async (page: number = 1, size: number = 10, name?: string) => {
