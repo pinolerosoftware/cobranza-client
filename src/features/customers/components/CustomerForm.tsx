@@ -1,6 +1,5 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { 
   TextInput, 
   Button, 
@@ -9,9 +8,7 @@ import {
   Group,
   Text,
   Box,
-  Divider,
-  Checkbox,
-  Textarea
+  Divider
 } from '@mantine/core';
 import { 
   IconUser, 
@@ -20,53 +17,35 @@ import {
   IconMail,
   IconMapPin,
   IconCheck,
-  IconX,
-  IconCash
+  IconX
 } from '@tabler/icons-react';
-
-export const customerSchema = z.object({
-  name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-  dni: z.string().min(5, 'El DNI es obligatorio'),
-  phone: z.string().min(8, 'El teléfono es obligatorio'),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
-  address: z.string().optional(),
-  status: z.enum(['active', 'overdue']),
-  notes: z.string().optional(),
-  receivesVisits: z.boolean().default(false),
-});
-
-type CustomerFormValues = z.infer<typeof customerSchema>;
+import { type Customer } from '@/types/customer';
+import { customerSchema, type CustomerFormValues } from '../schemas/customerFormSchema';
 
 interface CustomerFormProps {
   onSubmit: (values: CustomerFormValues) => void;
   onCancel: () => void;
-  initialData?: Partial<CustomerFormValues>;
+  initialData?: Partial<Customer>;
   isEditing?: boolean;
 }
 
 export function CustomerForm({ onSubmit, onCancel, initialData, isEditing = false }: CustomerFormProps) {
   const {
-    register,
+    control,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<CustomerFormValues>({
     resolver: zodResolver(customerSchema),
     defaultValues: {
-      status: initialData?.status ?? 'active',
-      receivesVisits: initialData?.receivesVisits ?? true,
-      name: initialData?.name ?? '',
+      firstName: initialData?.firstName ?? '',
+      lastName: initialData?.lastName ?? '',
       dni: initialData?.dni ?? '',
       phone: initialData?.phone ?? '',
       email: initialData?.email ?? '',
       address: initialData?.address ?? '',
-      notes: initialData?.notes ?? '',
+      active: initialData?.active ?? true,
     },
   });
-
-  const statusValue = watch('status');
-  const receivesVisits = watch('receivesVisits');
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -85,100 +64,129 @@ export function CustomerForm({ onSubmit, onCancel, initialData, isEditing = fals
         <Box>
           <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">Información Personal</Text>
           <Stack gap="md">
-            <TextInput
-              label="Nombre completo"
-              placeholder="Ej. Juan Pérez García"
-              {...register('name')}
-              error={errors.name?.message}
-              size="md"
-              radius="md"
-              withAsterisk
-              leftSection={<IconUser size={18} />}
-            />
-
             <Group grow>
-              <TextInput
-                label="DNI / Identificación"
-                placeholder="Ej. 12345678-9"
-                {...register('dni')}
-                error={errors.dni?.message}
-                size="md"
-                radius="md"
-                withAsterisk
-                leftSection={<IconId size={18} />}
+              <Controller
+                name="firstName"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Nombre"
+                    placeholder="Ej. Juan"
+                    {...field}
+                    error={errors.firstName?.message}
+                    size="md"
+                    radius="md"
+                    withAsterisk
+                    leftSection={<IconUser size={18} />}
+                  />
+                )}
               />
-              <TextInput
-                label="Teléfono"
-                placeholder="555-123-4567"
-                {...register('phone')}
-                error={errors.phone?.message}
-                size="md"
-                radius="md"
-                withAsterisk
-                leftSection={<IconPhone size={18} />}
+              <Controller
+                name="lastName"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Apellido"
+                    placeholder="Ej. Pérez"
+                    {...field}
+                    error={errors.lastName?.message}
+                    size="md"
+                    radius="md"
+                    withAsterisk
+                    leftSection={<IconUser size={18} />}
+                  />
+                )}
               />
             </Group>
 
-            <TextInput
-              label="Email (opcional)"
-              placeholder="correo@ejemplo.com"
-              {...register('email')}
-              error={errors.email?.message}
-              size="md"
-              radius="md"
-              leftSection={<IconMail size={18} />}
+            <Group grow>
+              <Controller
+                name="dni"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="DNI / Identificación"
+                    placeholder="Ej. 12345678-9"
+                    {...field}
+                    error={errors.dni?.message}
+                    size="md"
+                    radius="md"
+                    leftSection={<IconId size={18} />}
+                  />
+                )}
+              />
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Teléfono"
+                    placeholder="555-123-4567"
+                    {...field}
+                    error={errors.phone?.message}
+                    size="md"
+                    radius="md"
+                    leftSection={<IconPhone size={18} />}
+                  />
+                )}
+              />
+            </Group>
+
+            <Controller
+              name="email"
+              control={control}
+              render={({ field }) => (
+                <TextInput
+                  label="Email (opcional)"
+                  placeholder="correo@ejemplo.com"
+                  {...field}
+                  error={errors.email?.message}
+                  size="md"
+                  radius="md"
+                  leftSection={<IconMail size={18} />}
+                />
+              )}
             />
           </Stack>
         </Box>
 
         <Box>
-          <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">Ubicación</Text>
+          <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">Ubicación y Estado</Text>
           <Stack gap="md">
-            <TextInput
-              label="Dirección"
-              placeholder="Calle, número, colonia, ciudad"
-              {...register('address')}
-              error={errors.address?.message}
-              size="md"
-              radius="md"
-              leftSection={<IconMapPin size={18} />}
+            <Controller
+              name="address"
+              control={control}
+              render={({ field }) => (
+                <TextInput
+                  label="Dirección"
+                  placeholder="Calle, número, colonia, ciudad"
+                  {...field}
+                  error={errors.address?.message}
+                  size="md"
+                  radius="md"
+                  leftSection={<IconMapPin size={18} />}
+                />
+              )}
             />
-            <Checkbox
-              label="Recibe visitas en domicilio"
-              checked={receivesVisits}
-              onChange={(e) => setValue('receivesVisits', e.currentTarget.checked)}
-              size="md"
-            />
-          </Stack>
-        </Box>
-
-        <Box>
-          <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">Estado y Notas</Text>
-          <Stack gap="md">
-            <Select
-              label="Estado del cliente"
-              placeholder="Seleccione un estado"
-              data={[
-                { value: 'active', label: 'Al día' },
-                { value: 'overdue', label: 'En mora' },
-              ]}
-              value={statusValue}
-              onChange={(val) => setValue('status', val as 'active' | 'overdue')}
-              error={errors.status?.message}
-              size="md"
-              radius="md"
-              withAsterisk
-              leftSection={statusValue === 'active' ? <IconCash size={18} color="#40c057" /> : <IconCash size={18} color="#fa5252" />}
-            />
-
-            <Textarea
-              label="Notas adicionales"
-              placeholder="Información relevante sobre el cliente..."
-              {...register('notes')}
-              error={errors.notes?.message}
-              size="md"
-              radius="md"
-              minRows={3}
+            
+            <Controller
+              name="active"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label="Estado del cliente"
+                  placeholder="Seleccione un estado"
+                  data={[
+                    { value: 'true', label: 'Activo' },
+                    { value: 'false', label: 'Inactivo' },
+                  ]}
+                  value={field.value?.toString() ?? 'true'}
+                  onChange={(val) => field.onChange(val === 'true')}
+                  size="md"
+                  radius="md"
+                  withAsterisk
+                />
+              )}
             />
           </Stack>
         </Box>

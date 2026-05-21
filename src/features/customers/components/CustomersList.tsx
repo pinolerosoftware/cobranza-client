@@ -1,64 +1,63 @@
 import { useMemo, useState } from 'react';
-import { Badge, Stack, Button, Group, Drawer, Text, Title, Avatar, LoadingOverlay, Paper, Center } from '@mantine/core';
+import { Badge, Stack, Button, Group, Drawer, Text, Title, Avatar, LoadingOverlay, Paper, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { IconAlertTriangle } from '@tabler/icons-react';
 import { type ColumnDef } from '@tanstack/react-table';
-import { IconPlus, IconEdit, IconTrash, IconMapPin, IconPhone, IconMail, IconUsers, IconAlertCircle } from '@tabler/icons-react';
+import { IconPlus, IconPhone, IconMail, IconMapPin } from '@tabler/icons-react';
 import { DataTable } from '@/components/data-table/DataTable';
 import { CustomerForm } from './CustomerForm';
-import { useCustomers, useCreateCustomer, useDeleteCustomer } from '@/features/customers/hooks/useCustomers';
-import * as z from 'zod';
-import { customerSchema } from './CustomerForm';
-
-type CustomerFormValues = z.infer<typeof customerSchema>;
-
-interface Client {
-  id: string;
-  name: string;
-  dni: string;
-  phone: string;
-  email?: string;
-  address?: string;
-  status: 'active' | 'overdue';
-  notes?: string;
-  receivesVisits: boolean;
-}
+import { useCustomers, useCreateCustomer, useDeleteCustomer, useUpdateCustomer } from '@/features/customers/hooks/useCustomers';
+import { type CustomerFormValues } from '../schemas/customerFormSchema';
+import { type Customer } from '@/types/customer';
 
 export const CustomersList = () => {
   const [opened, { open, close }] = useDisclosure(false);
-  const [editingCustomer, setEditingCustomer] = useState<Client | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
   
   const { data: customersData, isLoading } = useCustomers();
   const createCustomer = useCreateCustomer();
+  const updateCustomer = useUpdateCustomer();
   const deleteCustomer = useDeleteCustomer();
   
-  const customers = customersData?.customers || [];
+  const customers = customersData?.content || [];
 
-  const columns = useMemo<ColumnDef<Client>[]>(
+  const columns = useMemo<ColumnDef<Customer>[]>(
     () => [
       {
-        accessorKey: 'name',
+        id: 'name',
         header: 'Cliente',
-        cell: ({ row }) => (
-          <Group gap="sm">
-            <Avatar size="sm" radius="xl" color={row.original.status === 'active' ? 'teal' : 'red'}>
-              {row.original.name.split(' ').map(n => n[0]).join('').slice(0,2)}
-            </Avatar>
-            <div>
-              <Text size="sm" fw={500}>{row.original.name}</Text>
-              <Text size="xs" c="dimmed">DNI: {row.original.dni}</Text>
-            </div>
-          </Group>
-        ),
+        accessorFn: (row) => `${row.firstName} ${row.lastName}`,
+        cell: ({ row }) => {
+          const name = `${row.original.firstName} ${row.original.lastName}`;
+          return (
+            <Group gap="sm">
+              <Avatar size="sm" radius="xl" color={row.original.active ? 'teal' : 'gray'}>
+                {row.original.firstName[0]}{row.original.lastName[0]}
+              </Avatar>
+              <div>
+                <Text size="sm" fw={500}>{name}</Text>
+                <Text size="xs" c="dimmed">DNI: {row.original.dni || '-'}</Text>
+              </div>
+            </Group>
+          );
+        },
       },
       {
         accessorKey: 'phone',
         header: 'Teléfono',
-        cell: ({ getValue }) => (
-          <Group gap="xs" wrap="nowrap">
-            <IconPhone size={14} color="gray" />
-            <Text size="sm">{getValue<string>()}</Text>
-          </Group>
-        ),
+        cell: ({ getValue }) => {
+          const phone = getValue<string>();
+          return phone ? (
+            <Group gap="xs" wrap="nowrap">
+              <IconPhone size={14} color="gray" />
+              <Text size="sm">{phone}</Text>
+            </Group>
+          ) : (
+            <Text size="sm" c="dimmed">-</Text>
+          );
+        },
       },
       {
         accessorKey: 'email',
@@ -91,14 +90,14 @@ export const CustomersList = () => {
         },
       },
       {
-        accessorKey: 'status',
+        accessorKey: 'active',
         header: 'Estado',
         cell: ({ getValue }) => {
-          const status = getValue<string>();
-          return status === 'active' ? (
-            <Badge color="teal" variant="light">Al día</Badge>
+          const active = getValue<boolean>();
+          return active ? (
+            <Badge color="teal" variant="light">Activo</Badge>
           ) : (
-            <Badge color="red" variant="light">En mora</Badge>
+            <Badge color="gray" variant="light">Inactivo</Badge>
           );
         },
       },
@@ -107,21 +106,51 @@ export const CustomersList = () => {
   );
 
   const handleAddCustomer = (values: CustomerFormValues) => {
-    createCustomer.mutate(values, {
-      onSuccess: () => {
-        close();
-        setEditingCustomer(null);
-      },
-    });
+    if (editingCustomer) {
+      updateCustomer.mutate({
+        ...editingCustomer,
+        ...values,
+      }, {
+        onSuccess: () => {
+          close();
+          setEditingCustomer(null);
+        },
+        onError: (error) => {
+          console.error('Error updating customer:', error);
+        },
+      });
+    } else {
+      createCustomer.mutate({
+        ...values,
+        active: true,
+      }, {
+        onSuccess: () => {
+          close();
+          setEditingCustomer(null);
+        },
+        onError: (error) => {
+          console.error('Error creating customer:', error);
+        },
+      });
+    }
   };
 
-  const handleEdit = (customer: Client) => {
+  const handleEdit = (customer: Customer) => {
     setEditingCustomer(customer);
     open();
   };
 
-  const handleDelete = (customer: Client) => {
-    deleteCustomer.mutate(customer.id);
+  const handleDelete = (customer: Customer) => {
+    setCustomerToDelete(customer);
+    openDeleteModal();
+  };
+
+  const confirmDelete = () => {
+    if (customerToDelete) {
+      deleteCustomer.mutate(customerToDelete);
+    }
+    closeDeleteModal();
+    setCustomerToDelete(null);
   };
 
   const handleCloseDrawer = () => {
@@ -167,13 +196,44 @@ export const CustomersList = () => {
         radius="md"
         overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
       >
-        <CustomerForm 
+        <CustomerForm
+          key={editingCustomer?.customerId ?? 'new'}
           onSubmit={handleAddCustomer} 
           onCancel={handleCloseDrawer}
           initialData={editingCustomer ?? undefined}
           isEditing={!!editingCustomer}
         />
       </Drawer>
+
+      <Modal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        title={
+          <Group gap="xs">
+            <IconAlertTriangle size={20} color="red" />
+            <Text fw={600}>Confirmar eliminación</Text>
+          </Group>
+        }
+        centered
+        radius="md"
+        overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
+      >
+        <Text size="sm" mb="lg">
+          ¿Estás seguro de que deseas eliminar al cliente{' '}
+          <Text component="span" fw={600}>
+            {customerToDelete?.firstName} {customerToDelete?.lastName}
+          </Text>
+          ? Esta acción no se puede deshacer.
+        </Text>
+        <Group justify="flex-end" gap="sm">
+          <Button variant="subtle" onClick={closeDeleteModal}>
+            Cancelar
+          </Button>
+          <Button color="red" onClick={confirmDelete} loading={deleteCustomer.isPending}>
+            Eliminar
+          </Button>
+        </Group>
+      </Modal>
     </Stack>
   );
 };

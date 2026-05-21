@@ -9,16 +9,13 @@ import {
   Badge,
   Avatar,
   Progress,
-  Table,
-  rem
+  Table
 } from '@mantine/core';
 import { 
   IconUsers, 
   IconUserCheck, 
   IconCash, 
   IconReceipt,
-  IconTrendingUp,
-  IconTrendingDown,
   IconArrowUpRight,
   IconArrowDownRight
 } from '@tabler/icons-react';
@@ -109,8 +106,6 @@ const stats = [
     trend: 'down'
   },
 ];
-
-const COLORS = ['#40c057', '#fab005', '#fa5252'];
 
 export const DashboardOverview = () => {
   return (

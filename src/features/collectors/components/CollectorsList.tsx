@@ -1,90 +1,90 @@
 import { useMemo, useState } from 'react';
-import { Badge, Stack, Button, Group, Drawer, Text, Title, Avatar, Progress } from '@mantine/core';
+import { Badge, Stack, Button, Group, Drawer, Text, Title, Avatar, LoadingOverlay, Paper, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { IconAlertTriangle } from '@tabler/icons-react';
 import { type ColumnDef } from '@tanstack/react-table';
-import { IconPlus, IconEdit, IconTrash } from '@tabler/icons-react';
+import { IconPlus, IconPhone, IconMail } from '@tabler/icons-react';
 import { DataTable } from '@/components/data-table/DataTable';
 import { CollectorForm } from './CollectorForm';
-import * as z from 'zod';
-import { collectorSchema } from './CollectorForm';
-
-type CollectorFormValues = z.infer<typeof collectorSchema>;
-
-interface Collector {
-  id: string;
-  name: string;
-  route: string;
-  efficiency: number;
-  status: 'active' | 'inactive';
-  phone?: string;
-  email?: string;
-}
-
-const mockData: Collector[] = [
-  { id: '1', name: 'Carlos Gómez', route: 'Zona Norte', efficiency: 95, status: 'active', phone: '555-1234', email: 'carlos@email.com' },
-  { id: '2', name: 'Ana Martínez', route: 'Zona Sur', efficiency: 88, status: 'active', phone: '555-5678' },
-  { id: '3', name: 'Roberto Sosa', route: 'Zona Este', efficiency: 72, status: 'inactive', phone: '555-9012' },
-  { id: '4', name: 'Lucía Fernández', route: 'Centro', efficiency: 98, status: 'active', phone: '555-3456', email: 'lucia@email.com' },
-  { id: '5', name: 'Miguel Torres', route: 'Zona Oeste', efficiency: 85, status: 'active', phone: '555-7890' },
-  { id: '6', name: 'Sofia Ramírez', route: 'Norte II', efficiency: 91, status: 'active', phone: '555-2345' },
-  { id: '7', name: 'Jorge Luis', route: 'Sur II', efficiency: 45, status: 'inactive', phone: '555-6789' },
-];
+import { useCollectors } from '@/features/collectors/hooks/useCollectors';
+import { useCreateUser, useUpdateUser, useDeleteUser } from '@/features/users/hooks/useUsers';
+import { type UserResponse } from '@/types/user';
+import { type CollectorFormValues } from '../schemas/collectorFormSchema';
 
 export const CollectorsList = () => {
   const [opened, { open, close }] = useDisclosure(false);
-  const [data, setData] = useState<Collector[]>(mockData);
-  const [editingCollector, setEditingCollector] = useState<Collector | null>(null);
+  const [deleteModalOpened, { open: openDeleteModal, close: closeDeleteModal }] = useDisclosure(false);
+  const [editingCollector, setEditingCollector] = useState<UserResponse | null>(null);
+  const [collectorToDelete, setCollectorToDelete] = useState<UserResponse | null>(null);
 
-  const columns = useMemo<ColumnDef<Collector>[]>(
+  const { data: collectorsData, isLoading } = useCollectors();
+  const createUser = useCreateUser();
+  const updateUser = useUpdateUser();
+  const deleteUser = useDeleteUser();
+
+  const collectors = collectorsData?.content || [];
+
+  const columns = useMemo<ColumnDef<UserResponse>[]>(
     () => [
       {
-        accessorKey: 'name',
+        id: 'name',
         header: 'Cobrador',
-        cell: ({ row }) => (
-          <Group gap="sm">
-            <Avatar size="sm" radius="xl" color="blue">
-              {row.original.name.split(' ').map(n => n[0]).join('').slice(0,2)}
-            </Avatar>
-            <div>
-              <Text size="sm" fw={500}>{row.original.name}</Text>
-              {row.original.email && <Text size="xs" c="dimmed">{row.original.email}</Text>}
-            </div>
-          </Group>
-        ),
-      },
-      {
-        accessorKey: 'route',
-        header: 'Ruta',
-      },
-      {
-        accessorKey: 'phone',
-        header: 'Teléfono',
-      },
-      {
-        accessorKey: 'efficiency',
-        header: 'Eficiencia',
-        cell: ({ getValue }) => {
-          const value = getValue<number>();
+        accessorFn: (row) => `${row.firstName} ${row.lastName}`,
+        cell: ({ row }) => {
+          const name = `${row.original.firstName} ${row.original.lastName}`;
           return (
-            <Group gap="xs" wrap="nowrap">
-              <Progress 
-                value={value} 
-                size="sm" 
-                w={60} 
-                radius="xl"
-                color={value >= 90 ? 'teal' : value >= 70 ? 'blue' : value >= 50 ? 'yellow' : 'red'} 
-              />
-              <Text size="sm" fw={500}>{value}%</Text>
+            <Group gap="sm">
+              <Avatar size="sm" radius="xl" color="blue">
+                {row.original.firstName[0]}{row.original.lastName[0]}
+              </Avatar>
+              <div>
+                <Text size="sm" fw={500}>{name}</Text>
+                {row.original.email && <Text size="xs" c="dimmed">{row.original.email}</Text>}
+              </div>
             </Group>
           );
         },
       },
       {
-        accessorKey: 'status',
+        accessorKey: 'userName',
+        header: 'Usuario',
+      },
+      {
+        accessorKey: 'phone',
+        header: 'Teléfono',
+        cell: ({ getValue }) => {
+          const phone = getValue<string | null>();
+          return phone ? (
+            <Group gap="xs" wrap="nowrap">
+              <IconPhone size={14} color="gray" />
+              <Text size="sm">{phone}</Text>
+            </Group>
+          ) : (
+            <Text size="sm" c="dimmed">-</Text>
+          );
+        },
+      },
+      {
+        accessorKey: 'email',
+        header: 'Email',
+        cell: ({ getValue }) => {
+          const email = getValue<string | null>();
+          return email ? (
+            <Group gap="xs" wrap="nowrap">
+              <IconMail size={14} color="gray" />
+              <Text size="sm" c="dimmed">{email}</Text>
+            </Group>
+          ) : (
+            <Text size="sm" c="dimmed">-</Text>
+          );
+        },
+      },
+      {
+        accessorKey: 'active',
         header: 'Estado',
         cell: ({ getValue }) => {
-          const status = getValue<string>();
-          return status === 'active' ? (
+          const active = getValue<boolean>();
+          return active ? (
             <Badge color="teal" variant="light">Activo</Badge>
           ) : (
             <Badge color="gray" variant="light">Inactivo</Badge>
@@ -95,27 +95,77 @@ export const CollectorsList = () => {
     []
   );
 
-  const handleAddCollector = (values: CollectorFormValues) => {
+  const userToFormValues = (user: UserResponse): Partial<CollectorFormValues> => ({
+    firstName: user.firstName,
+    lastName: user.lastName,
+    userName: user.userName,
+    email: user.email ?? '',
+    phone: user.phone ?? '',
+    active: user.active,
+  });
+
+  const handleSave = (values: CollectorFormValues) => {
+    const userId = String(editingCollector?.id ?? '');
     if (editingCollector) {
-      setData((prev) => prev.map(c => c.id === editingCollector.id ? { ...c, ...values } : c));
+      updateUser.mutate({
+        id: userId,
+        data: {
+          firstName: values.firstName,
+          lastName: values.lastName,
+          userName: values.userName,
+          role: 'Cobrador',
+          email: values.email || null,
+          phone: values.phone || null,
+        },
+      }, {
+        onSuccess: () => {
+          close();
+          setEditingCollector(null);
+        },
+        onError: (error) => {
+          console.error('Error updating collector:', error);
+        },
+      });
     } else {
-      const newCollector: Collector = {
-        id: Math.random().toString(36).substr(2, 9),
-        ...values,
-      };
-      setData((prev) => [newCollector, ...prev]);
+      createUser.mutate({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        userName: values.userName,
+        password: values.password || '123456',
+        role: 'Cobrador',
+        email: values.email || null,
+        phone: values.phone || null,
+      }, {
+        onSuccess: () => {
+          close();
+          setEditingCollector(null);
+        },
+        onError: (error) => {
+          console.error('Error creating collector:', error);
+        },
+      });
     }
-    close();
-    setEditingCollector(null);
   };
 
-  const handleEdit = (collector: Collector) => {
+  const handleEdit = (collector: UserResponse) => {
     setEditingCollector(collector);
     open();
   };
 
-  const handleDelete = (collector: Collector) => {
-    setData((prev) => prev.filter(c => c.id !== collector.id));
+  const handleDelete = (collector: UserResponse) => {
+    setCollectorToDelete(collector);
+    openDeleteModal();
+  };
+
+  const confirmDelete = () => {
+    if (collectorToDelete) {
+      deleteUser.mutate(String(collectorToDelete.id), {
+        onSuccess: () => {
+          closeDeleteModal();
+          setCollectorToDelete(null);
+        },
+      });
+    }
   };
 
   const handleCloseDrawer = () => {
@@ -140,13 +190,16 @@ export const CollectorsList = () => {
         </Button>
       </Group>
 
-      <DataTable 
-        columns={columns} 
-        data={data} 
-        searchPlaceholder="Buscar cobrador por nombre, ruta o teléfono..."
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+      <Paper pos="relative">
+        <LoadingOverlay visible={isLoading} overlayProps={{ blur: 2 }} />
+        <DataTable 
+          columns={columns} 
+          data={collectors} 
+          searchPlaceholder="Buscar cobrador por nombre, usuario o teléfono..."
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
+      </Paper>
 
       <Drawer
         opened={opened}
@@ -159,12 +212,42 @@ export const CollectorsList = () => {
         overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
       >
         <CollectorForm 
-          onSubmit={handleAddCollector} 
+          onSubmit={handleSave} 
           onCancel={handleCloseDrawer}
-          initialData={editingCollector ?? undefined}
+          initialData={editingCollector ? userToFormValues(editingCollector) : undefined}
           isEditing={!!editingCollector}
         />
       </Drawer>
+
+      <Modal
+        opened={deleteModalOpened}
+        onClose={closeDeleteModal}
+        title={
+          <Group gap="xs">
+            <IconAlertTriangle size={20} color="red" />
+            <Text fw={600}>Confirmar eliminación</Text>
+          </Group>
+        }
+        centered
+        radius="md"
+        overlayProps={{ backgroundOpacity: 0.5, blur: 4 }}
+      >
+        <Text size="sm" mb="lg">
+          ¿Estás seguro de que deseas eliminar al cobrador{' '}
+          <Text component="span" fw={600}>
+            {collectorToDelete?.firstName} {collectorToDelete?.lastName}
+          </Text>
+          ? Esta acción no se puede deshacer.
+        </Text>
+        <Group justify="flex-end" gap="sm">
+          <Button variant="subtle" onClick={closeDeleteModal}>
+            Cancelar
+          </Button>
+          <Button color="red" onClick={confirmDelete} loading={deleteUser.isPending}>
+            Eliminar
+          </Button>
+        </Group>
+      </Modal>
     </Stack>
   );
 };

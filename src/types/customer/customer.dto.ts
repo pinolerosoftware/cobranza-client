@@ -3,11 +3,13 @@ export interface Customer {
   firstName: string;
   lastName: string;
   dni?: string;
+  passport?: string | null;
   email?: string;
   phone?: string;
+  phoneNumber?: string;
   address?: string;
   active: boolean;
   companyId?: number;
-  createAt?: string;
-  updateAt?: string | null;
+  createdAt?: string;
+  updatedAt?: string | null;
 }

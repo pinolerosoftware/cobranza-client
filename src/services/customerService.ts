@@ -1,31 +1,60 @@
 import api from './api';
 import { type Customer } from '@/types/customer';
+import type { ApiResponse, PaginatedResponse } from '@/types/api';
 
-// Get customers with pagination
-export const getCustomers = async (page: number = 1, size: number = 10, name?: string) => {
-  const params: { page: number; size: number; name?: string } = { page, size };
-  if (name) {
-    params.name = name;
+type CreateCustomerData = Omit<Customer, 'customerId' | 'createdAt' | 'updatedAt'>;
+
+class CustomerService {
+  private toApiPayload(data: CreateCustomerData | Customer): Record<string, unknown> {
+    const { phone, phoneNumber, ...rest } = data;
+    return {
+      ...rest,
+      phoneNumber: phone || phoneNumber || null,
+    };
   }
-  
-  const response = await api.get<{ customers: Customer[]; total: number }>('/customers', { params });
-  return response.data;
-};
 
-// Create customer
-export const createCustomer = async (customerData: Omit<Customer, 'customerId' | 'createAt' | 'updateAt'>) => {
-  const response = await api.post<Customer>('/customers', customerData);
-  return response.data;
-};
+  private fromApiResponse(data: Record<string, unknown>): Customer {
+    const { phoneNumber, ...rest } = data;
+    return {
+      ...rest,
+      phone: (phoneNumber as string) || undefined,
+    } as unknown as Customer;
+  }
 
-// Update customer
-export const updateCustomer = async (customerData: Customer) => {
-  const response = await api.put<Customer>(`/customers/${customerData.customerId}`, customerData);
-  return response.data;
-};
+  async getAll(page: number = 1, size: number = 10, search?: string): Promise<PaginatedResponse<Customer>> {
+    const params: { page: number; size: number; search?: string } = { page, size };
+    if (search) {
+      params.search = search;
+    }
 
-// Delete customer
-export const deleteCustomer = async (customerId: number) => {
-  const response = await api.delete(`/customers/${customerId}`);
-  return response.data;
-};
+    const response = await api.get<ApiResponse<Record<string, unknown>[]>>('/Customer', { params });
+
+    return {
+      content: response.data.data.map((item) => this.fromApiResponse(item)),
+      totalElements: response.data.data.length,
+      totalPages: Math.ceil(response.data.data.length / size),
+      size: size,
+      number: page,
+    };
+  }
+
+  async create(customerData: CreateCustomerData): Promise<Customer> {
+    const payload = this.toApiPayload(customerData);
+    const response = await api.post<ApiResponse<Record<string, unknown>>>('/Customer', payload);
+    return this.fromApiResponse(response.data.data);
+  }
+
+  async update(customerData: Customer): Promise<Customer> {
+    const payload = this.toApiPayload(customerData);
+    const response = await api.put<ApiResponse<Record<string, unknown>>>('/Customer', payload);
+    return this.fromApiResponse(response.data.data);
+  }
+
+  async delete(customerData: Customer): Promise<void> {
+    const payload = this.toApiPayload(customerData);
+    await api.delete('/Customer', { data: payload });
+  }
+}
+
+export const customerService = new CustomerService();
+export default customerService;

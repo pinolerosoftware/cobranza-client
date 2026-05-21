@@ -29,7 +29,6 @@ import {
   IconSearch, 
   IconSortAscending, 
   IconSortDescending, 
-  IconArrowsSort,
   IconEye,
   IconPencil,
   IconTrash,
@@ -45,7 +44,7 @@ interface DataTableProps<TData> {
   onView?: (row: TData) => void;
 }
 
-export function DataTable<TData extends { id?: string }>({ 
+export function DataTable<TData>({ 
   columns, 
   data, 
   searchPlaceholder = "Buscar...",

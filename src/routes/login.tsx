@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from '@tanstack/react-router';
 import { LoginForm } from '@/features/auth/components/LoginForm';
 
 export const Route = createFileRoute('/login')({
-  beforeLoad: ({ search }) => {
+  beforeLoad: () => {
     const token = localStorage.getItem('token');
     if (token) {
       throw redirect({ to: '/' });

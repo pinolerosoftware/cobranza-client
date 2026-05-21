@@ -5,10 +5,10 @@ export const createUserSchema = z.object({
   lastName: z.string().min(1, 'El apellido es requerido'),
   userName: z.string().min(3, 'El username debe tener al menos 3 caracteres'),
   password: z.string().min(4, 'La contraseña debe tener al menos 4 caracteres'),
-  companyId: z.string().min(1, 'La empresa es requerida'),
-  role: z.enum(['Admin', 'Cobrador']),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
-  phone: z.string().optional(),
+  companyId: z.number().nullable().optional(),
+  role: z.string().min(1, 'El rol es requerido'),
+  email: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
 });
 
 export const updateUserSchema = createUserSchema.partial().extend({
@@ -16,17 +16,18 @@ export const updateUserSchema = createUserSchema.partial().extend({
 });
 
 export const userResponseSchema = z.object({
-  id: z.string(),
+  id: z.union([z.string(), z.number()]),
   firstName: z.string(),
   lastName: z.string(),
   userName: z.string(),
-  role: z.enum(['Admin', 'Cobrador']),
-  email: z.string().nullable(),
-  phone: z.string().nullable(),
-  companyId: z.string(),
-  active: z.boolean(),
-  createdAt: z.string().nullable(),
-  updatedAt: z.string().nullable(),
+  role: z.string(),
+  email: z.string().nullable().optional(),
+  phone: z.string().nullable().optional(),
+  companyId: z.number().nullable().optional(),
+  companyName: z.string().nullable().optional(),
+  active: z.boolean().optional(),
+  createdAt: z.string().nullable().optional(),
+  updatedAt: z.string().nullable().optional(),
 });
 
 export const paginatedUsersSchema = z.object({
@@ -39,7 +40,34 @@ export const paginatedUsersSchema = z.object({
 
 export type CreateUserDTO = z.infer<typeof createUserSchema>;
 export type UpdateUserDTO = z.infer<typeof updateUserSchema>;
-export type UserResponse = z.infer<typeof userResponseSchema>;
-export type PaginatedUsers = z.infer<typeof paginatedUsersSchema>;
+export type UserResponse = {
+  id: string | number;
+  firstName: string;
+  lastName: string;
+  userName: string;
+  role: string;
+  email: string | null | undefined;
+  phone: string | null | undefined;
+  companyId: number | null | undefined;
+  companyName?: string | null;
+  active?: boolean;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
+export type PaginatedUsers = {
+  content: UserResponse[];
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+};
 
-export type UserRole = 'Admin' | 'Cobrador';
+export type UserRole = string;
+
+export interface UserFilters {
+  page?: number;
+  size?: number;
+  search?: string;
+  role?: string;
+  active?: boolean;
+}

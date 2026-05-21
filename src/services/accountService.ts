@@ -1,10 +1,11 @@
 import api from './api';
 import type { LoginCredentials, LoginResponse } from '@/types/auth';
+import type { ApiResponse } from '@/types/api';
 
 class AccountService {
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await api.post<LoginResponse>('/account/login', credentials);
-    return response.data;
+    const response = await api.post<ApiResponse<LoginResponse>>('/Account/Login', credentials);
+    return response.data.data;
   }
 
   logout(): void {

@@ -1,25 +1,18 @@
 import { useState } from 'react';
-import { 
-  createCustomer, 
-  getCustomers, 
-  updateCustomer, 
-  deleteCustomer,
-  type Customer
-} from '@/services/customerService';
+import { customerService } from '@/services/customerService';
+import { type Customer } from '@/types/customer';
 
-// Custom hook for customer management
 export const useCustomers = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch customers with pagination
   const fetchCustomers = async (page: number = 1, size: number = 10, name?: string) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getCustomers(page, size, name);
-      setCustomers(response.customers);
+      const response = await customerService.getAll(page, size, name);
+      setCustomers(response.content);
       return response;
     } catch (err) {
       setError('Error fetching customers');
@@ -29,12 +22,11 @@ export const useCustomers = () => {
     }
   };
 
-  // Create a new customer
-  const createNewCustomer = async (customerData: Omit<Customer, 'customerId' | 'createAt' | 'updateAt'>) => {
+  const createNewCustomer = async (customerData: Omit<Customer, 'customerId' | 'createdAt' | 'updatedAt'>) => {
     setLoading(true);
     setError(null);
     try {
-      const newCustomer = await createCustomer(customerData);
+      const newCustomer = await customerService.create(customerData);
       setCustomers(prev => [newCustomer, ...prev]);
       return newCustomer;
     } catch (err) {
@@ -45,13 +37,12 @@ export const useCustomers = () => {
     }
   };
 
-  // Update an existing customer
   const updateExistingCustomer = async (customerData: Customer) => {
     setLoading(true);
     setError(null);
     try {
-      const updatedCustomer = await updateCustomer(customerData);
-      setCustomers(prev => 
+      const updatedCustomer = await customerService.update(customerData);
+      setCustomers(prev =>
         prev.map(c => c.customerId === customerData.customerId ? updatedCustomer : c)
       );
       return updatedCustomer;
@@ -63,12 +54,14 @@ export const useCustomers = () => {
     }
   };
 
-  // Delete a customer
   const deleteCustomerById = async (customerId: number) => {
     setLoading(true);
     setError(null);
     try {
-      await deleteCustomer(customerId);
+      const customer = customers.find(c => c.customerId === customerId);
+      if (customer) {
+        await customerService.delete(customer);
+      }
       setCustomers(prev => prev.filter(c => c.customerId !== customerId));
     } catch (err) {
       setError('Error deleting customer');
@@ -85,6 +78,6 @@ export const useCustomers = () => {
     fetchCustomers,
     createNewCustomer,
     updateExistingCustomer,
-    deleteCustomerById
+    deleteCustomerById,
   };
 };

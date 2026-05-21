@@ -1,37 +1,25 @@
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { 
   TextInput, 
   Button, 
   Stack, 
-  Select, 
-  NumberInput,
+  Select,
   Group,
   Text,
   Box,
-  ThemeIcon,
-  Divider,
-  Progress
+  Divider
 } from '@mantine/core';
 import { 
   IconUser, 
-  IconMapPin, 
-  IconChartBar,
+  IconId,
+  IconPhone,
+  IconMail,
   IconCheck,
-  IconX
+  IconX,
+  IconLock
 } from '@tabler/icons-react';
-
-export const collectorSchema = z.object({
-  name: z.string().min(3, 'El nombre debe tener al menos 3 caracteres'),
-  route: z.string().min(2, 'La ruta es obligatoria'),
-  efficiency: z.number().min(0).max(100, 'La eficiencia debe estar entre 0 y 100'),
-  status: z.enum(['active', 'inactive']),
-  phone: z.string().optional(),
-  email: z.string().email('Email inválido').optional().or(z.literal('')),
-});
-
-type CollectorFormValues = z.infer<typeof collectorSchema>;
+import { collectorSchema, type CollectorFormValues } from '../schemas/collectorFormSchema';
 
 interface CollectorFormProps {
   onSubmit: (values: CollectorFormValues) => void;
@@ -42,25 +30,21 @@ interface CollectorFormProps {
 
 export function CollectorForm({ onSubmit, onCancel, initialData, isEditing = false }: CollectorFormProps) {
   const {
-    register,
+    control,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<CollectorFormValues>({
     resolver: zodResolver(collectorSchema),
     defaultValues: {
-      efficiency: initialData?.efficiency ?? 0,
-      status: initialData?.status ?? 'active',
-      name: initialData?.name ?? '',
-      route: initialData?.route ?? '',
-      phone: initialData?.phone ?? '',
+      firstName: initialData?.firstName ?? '',
+      lastName: initialData?.lastName ?? '',
+      userName: initialData?.userName ?? '',
+      password: '',
       email: initialData?.email ?? '',
+      phone: initialData?.phone ?? '',
+      active: initialData?.active ?? true,
     },
   });
-
-  const statusValue = watch('status');
-  const efficiencyValue = watch('efficiency') ?? 0;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -79,98 +63,138 @@ export function CollectorForm({ onSubmit, onCancel, initialData, isEditing = fal
         <Box>
           <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">Información Personal</Text>
           <Stack gap="md">
-            <TextInput
-              label="Nombre completo"
-              placeholder="Ej. Juan Pérez García"
-              {...register('name')}
-              error={errors.name?.message}
-              size="md"
-              radius="md"
-              withAsterisk
-              leftSection={<IconUser size={18} />}
-            />
+            <Group grow>
+              <Controller
+                name="firstName"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Nombre"
+                    placeholder="Ej. Juan"
+                    {...field}
+                    error={errors.firstName?.message}
+                    size="md"
+                    radius="md"
+                    withAsterisk
+                    leftSection={<IconUser size={18} />}
+                  />
+                )}
+              />
+              <Controller
+                name="lastName"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Apellido"
+                    placeholder="Ej. Pérez"
+                    {...field}
+                    error={errors.lastName?.message}
+                    size="md"
+                    radius="md"
+                    withAsterisk
+                    leftSection={<IconUser size={18} />}
+                  />
+                )}
+              />
+            </Group>
 
             <Group grow>
-              <TextInput
-                label="Teléfono"
-                placeholder="555-123-4567"
-                {...register('phone')}
-                error={errors.phone?.message}
-                size="md"
-                radius="md"
+              <Controller
+                name="phone"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Teléfono"
+                    placeholder="555-123-4567"
+                    {...field}
+                    error={errors.phone?.message}
+                    size="md"
+                    radius="md"
+                    leftSection={<IconPhone size={18} />}
+                  />
+                )}
               />
-              <TextInput
-                label="Email"
-                placeholder="correo@ejemplo.com"
-                {...register('email')}
-                error={errors.email?.message}
-                size="md"
-                radius="md"
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Email"
+                    placeholder="correo@ejemplo.com"
+                    {...field}
+                    error={errors.email?.message}
+                    size="md"
+                    radius="md"
+                    leftSection={<IconMail size={18} />}
+                  />
+                )}
               />
             </Group>
           </Stack>
         </Box>
 
         <Box>
-          <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">Asignación</Text>
+          <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">Acceso al Sistema</Text>
           <Stack gap="md">
-            <TextInput
-              label="Ruta asignada"
-              placeholder="Ej. Zona Norte"
-              {...register('route')}
-              error={errors.route?.message}
-              size="md"
-              radius="md"
-              withAsterisk
-              leftSection={<IconMapPin size={18} />}
+            <Controller
+              name="userName"
+              control={control}
+              render={({ field }) => (
+                <TextInput
+                  label="Nombre de usuario"
+                  placeholder="Ej. juan.perez"
+                  {...field}
+                  error={errors.userName?.message}
+                  size="md"
+                  radius="md"
+                  withAsterisk
+                  leftSection={<IconId size={18} />}
+                  disabled={isEditing}
+                />
+              )}
             />
-
-            <NumberInput
-              label="Eficiencia inicial (%)"
-              placeholder="0-100"
-              value={efficiencyValue}
-              onChange={(val) => setValue('efficiency', typeof val === 'number' ? val : 0)}
-              error={errors.efficiency?.message}
-              min={0}
-              max={100}
-              size="md"
-              radius="md"
-              withAsterisk
-              leftSection={<IconChartBar size={18} />}
-              suffix="%"
-              hideControls
-            />
-            <Box>
-              <Group justify="space-between" mb={4}>
-                <Text size="xs" c="dimmed">Progreso</Text>
-                <Text size="xs" fw={500}>{efficiencyValue}%</Text>
-              </Group>
-              <Progress 
-                value={efficiencyValue} 
-                size="sm" 
-                radius="xl"
-                color={efficiencyValue >= 90 ? 'teal' : efficiencyValue >= 70 ? 'blue' : 'orange'} 
+            {!isEditing && (
+              <Controller
+                name="password"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Contraseña"
+                    placeholder="••••••"
+                    {...field}
+                    error={errors.password?.message}
+                    size="md"
+                    radius="md"
+                    withAsterisk
+                    leftSection={<IconLock size={18} />}
+                  />
+                )}
               />
-            </Box>
+            )}
           </Stack>
         </Box>
 
         <Box>
           <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">Estado</Text>
-          <Select
-            label="Estado del cobrador"
-            placeholder="Seleccione un estado"
-            data={[
-              { value: 'active', label: 'Activo' },
-              { value: 'inactive', label: 'Inactivo' },
-            ]}
-            value={statusValue}
-            onChange={(val) => setValue('status', val as 'active' | 'inactive')}
-            error={errors.status?.message}
-            size="md"
-            radius="md"
-            withAsterisk
-            allowDeselect={false}
+          <Controller
+            name="active"
+            control={control}
+            render={({ field }) => (
+              <Select
+                label="Estado del cobrador"
+                placeholder="Seleccione un estado"
+                data={[
+                  { value: 'true', label: 'Activo' },
+                  { value: 'false', label: 'Inactivo' },
+                ]}
+                value={field.value?.toString() ?? 'true'}
+                onChange={(val) => field.onChange(val === 'true')}
+                size="md"
+                radius="md"
+                withAsterisk
+                allowDeselect={false}
+              />
+            )}
           />
         </Box>
 
