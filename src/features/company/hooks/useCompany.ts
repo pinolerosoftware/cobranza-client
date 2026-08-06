@@ -7,7 +7,7 @@ export const COMPANY_QUERY_KEY = 'companies';
 export const useCompanyList = (filters: CompanyFilters = {}) => {
   return useQuery({
     queryKey: [COMPANY_QUERY_KEY, filters],
-    queryFn: () => companyService.getAll(filters.page, filters.size),
+    queryFn: () => companyService.getAll(filters),
   });
 };
 

@@ -1,58 +1,42 @@
 import api from './api';
-import { type Customer } from '@/types/customer';
 import type { ApiResponse, PaginatedResponse } from '@/types/api';
-
-type CreateCustomerData = Omit<Customer, 'customerId' | 'createdAt' | 'updatedAt'>;
+import type { Customer, CreateCustomerDTO, UpdateCustomerDTO } from '@/types/customer';
 
 class CustomerService {
-  private toApiPayload(data: CreateCustomerData | Customer): Record<string, unknown> {
-    const { phone, phoneNumber, ...rest } = data;
-    return {
-      ...rest,
-      phoneNumber: phone || phoneNumber || null,
-    };
-  }
-
-  private fromApiResponse(data: Record<string, unknown>): Customer {
-    const { phoneNumber, ...rest } = data;
-    return {
-      ...rest,
-      phone: (phoneNumber as string) || undefined,
-    } as unknown as Customer;
-  }
-
-  async getAll(page: number = 1, size: number = 10, search?: string): Promise<PaginatedResponse<Customer>> {
-    const params: { page: number; size: number; search?: string } = { page, size };
-    if (search) {
-      params.search = search;
+  private toApiPayload(data: Record<string, unknown>): Record<string, unknown> {
+    const payload = { ...data };
+    for (const key of Object.keys(payload)) {
+      if (payload[key] === '') {
+        payload[key] = null;
+      }
     }
+    return payload;
+  }
 
-    const response = await api.get<ApiResponse<Record<string, unknown>[]>>('/Customer', { params });
+  async getAll(page: number = 1, size: number = 10): Promise<PaginatedResponse<Customer>> {
+    const response = await api.get<ApiResponse<Customer[]>>('/Customer', { page, size });
 
     return {
-      content: response.data.data.map((item) => this.fromApiResponse(item)),
-      totalElements: response.data.data.length,
-      totalPages: Math.ceil(response.data.data.length / size),
-      size: size,
+      content: response.data || [],
+      totalElements: response.data?.length || 0,
+      totalPages: Math.ceil((response.data?.length || 0) / size),
+      size,
       number: page,
     };
   }
 
-  async create(customerData: CreateCustomerData): Promise<Customer> {
-    const payload = this.toApiPayload(customerData);
-    const response = await api.post<ApiResponse<Record<string, unknown>>>('/Customer', payload);
-    return this.fromApiResponse(response.data.data);
+  async create(data: CreateCustomerDTO): Promise<Customer> {
+    const response = await api.post<ApiResponse<Customer>>('/Customer', this.toApiPayload(data as Record<string, unknown>));
+    return response.data;
   }
 
-  async update(customerData: Customer): Promise<Customer> {
-    const payload = this.toApiPayload(customerData);
-    const response = await api.put<ApiResponse<Record<string, unknown>>>('/Customer', payload);
-    return this.fromApiResponse(response.data.data);
+  async update(data: UpdateCustomerDTO): Promise<Customer> {
+    const response = await api.put<ApiResponse<Customer>>('/Customer', this.toApiPayload(data as Record<string, unknown>));
+    return response.data;
   }
 
-  async delete(customerData: Customer): Promise<void> {
-    const payload = this.toApiPayload(customerData);
-    await api.delete('/Customer', { data: payload });
+  async delete(data: UpdateCustomerDTO): Promise<void> {
+    await api.delete('/Customer', data);
   }
 }
 

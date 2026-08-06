@@ -1,63 +1,53 @@
 import api from '@/services/api';
+import type { ApiResponse, PaginatedResponse } from '@/types/api';
 import type {
   CreateUserDTO,
   UpdateUserDTO,
+  DeleteUserDTO,
   UserResponse,
-  PaginatedUsers,
   UserFilters,
 } from '@/types/user';
 
 class UserService {
-  async getUsers(filters: UserFilters = {}): Promise<PaginatedUsers> {
-    const { page = 1, size = 10, search, role, active } = filters;
-    const params = new URLSearchParams({
-      page: page.toString(),
-      size: size.toString(),
-    });
+  private toApiPayload(data: Record<string, unknown>): Record<string, unknown> {
+    const payload = { ...data };
+    for (const key of Object.keys(payload)) {
+      if (payload[key] === '') {
+        payload[key] = null;
+      }
+    }
+    return payload;
+  }
 
-    if (search) params.append('search', search);
-    if (role) params.append('role', role);
-    if (active !== undefined) params.append('active', active.toString());
+  async getUsers(filters: UserFilters = {}): Promise<PaginatedResponse<UserResponse>> {
+    const { page = 1, size = 10, role, companyId } = filters;
+    const params: Record<string, string | number> = { page, size };
+    if (role) params.role = role;
+    if (companyId !== undefined) params.companyId = companyId;
 
-    const response = await api.get<unknown>(`/User?${params.toString()}`);
-    const data = response.data as Record<string, unknown>;
-    
-    const content = (data.data as UserResponse[]) || [];
+    const response = await api.get<ApiResponse<UserResponse[]>>('/User', params);
+
     return {
-      content,
-      totalElements: data.rowCount as number || content.length,
-      totalPages: Math.ceil((data.rowCount as number || content.length) / size),
+      content: response.data || [],
+      totalElements: response.data?.length || 0,
+      totalPages: Math.ceil((response.data?.length || 0) / size),
       size,
       number: page,
     };
   }
 
-  async getUserById(id: string): Promise<UserResponse> {
-    const response = await api.get<UserResponse>(`/User/${id}`);
-    return response.data;
-  }
-
   async createUser(data: CreateUserDTO): Promise<UserResponse> {
-    const response = await api.post<UserResponse>('/User', data);
+    const response = await api.post<ApiResponse<UserResponse>>('/User', this.toApiPayload(data as Record<string, unknown>));
     return response.data;
   }
 
-  async updateUser(id: string, data: UpdateUserDTO): Promise<UserResponse> {
-    const response = await api.put<UserResponse>(`/User/${id}`, data);
+  async updateUser(data: UpdateUserDTO): Promise<UserResponse> {
+    const response = await api.put<ApiResponse<UserResponse>>('/User', this.toApiPayload(data as Record<string, unknown>));
     return response.data;
   }
 
-  async deleteUser(id: string): Promise<void> {
-    await api.delete(`/User/${id}`);
-  }
-
-  async toggleUserStatus(id: string, active: boolean): Promise<UserResponse> {
-    const response = await api.patch<UserResponse>(`/User/${id}/status`, { active });
-    return response.data;
-  }
-
-  async changePassword(id: string, newPassword: string): Promise<void> {
-    await api.patch(`/User/${id}/password`, { password: newPassword });
+  async deleteUser(data: DeleteUserDTO): Promise<void> {
+    await api.delete('/User', data);
   }
 }
 

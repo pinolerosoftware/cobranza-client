@@ -7,11 +7,11 @@ export const useCustomers = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchCustomers = async (page: number = 1, size: number = 10, name?: string) => {
+  const fetchCustomers = async (page: number = 1, size: number = 10) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await customerService.getAll(page, size, name);
+      const response = await customerService.getAll(page, size);
       setCustomers(response.content);
       return response;
     } catch (err) {

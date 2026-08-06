@@ -2,6 +2,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { 
   TextInput, 
+  PasswordInput,
   Button, 
   Stack, 
   Select,
@@ -158,7 +159,7 @@ export function CollectorForm({ onSubmit, onCancel, initialData, isEditing = fal
                 name="password"
                 control={control}
                 render={({ field }) => (
-                  <TextInput
+                  <PasswordInput
                     label="Contraseña"
                     placeholder="••••••"
                     {...field}

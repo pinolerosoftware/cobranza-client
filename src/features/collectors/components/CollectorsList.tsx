@@ -34,26 +34,22 @@ export const CollectorsList = () => {
           const name = `${row.original.firstName} ${row.original.lastName}`;
           return (
             <Group gap="sm">
-              <Avatar size="sm" radius="xl" color="blue">
+              <Avatar size="sm" radius="xl" color={row.original.active ? 'teal' : 'gray'}>
                 {row.original.firstName[0]}{row.original.lastName[0]}
               </Avatar>
               <div>
                 <Text size="sm" fw={500}>{name}</Text>
-                {row.original.email && <Text size="xs" c="dimmed">{row.original.email}</Text>}
+                <Text size="xs" c="dimmed">@{row.original.userName}</Text>
               </div>
             </Group>
           );
         },
       },
       {
-        accessorKey: 'userName',
-        header: 'Usuario',
-      },
-      {
-        accessorKey: 'phone',
+        id: 'phone',
         header: 'Teléfono',
-        cell: ({ getValue }) => {
-          const phone = getValue<string | null>();
+        cell: ({ row }) => {
+          const phone = row.original.phone;
           return phone ? (
             <Group gap="xs" wrap="nowrap">
               <IconPhone size={14} color="gray" />
@@ -65,10 +61,10 @@ export const CollectorsList = () => {
         },
       },
       {
-        accessorKey: 'email',
+        id: 'email',
         header: 'Email',
-        cell: ({ getValue }) => {
-          const email = getValue<string | null>();
+        cell: ({ row }) => {
+          const email = row.original.email;
           return email ? (
             <Group gap="xs" wrap="nowrap">
               <IconMail size={14} color="gray" />
@@ -80,10 +76,10 @@ export const CollectorsList = () => {
         },
       },
       {
-        accessorKey: 'active',
+        id: 'active',
         header: 'Estado',
-        cell: ({ getValue }) => {
-          const active = getValue<boolean>();
+        cell: ({ row }) => {
+          const active = row.original.active;
           return active ? (
             <Badge color="teal" variant="light">Activo</Badge>
           ) : (
@@ -105,18 +101,21 @@ export const CollectorsList = () => {
   });
 
   const handleSave = (values: CollectorFormValues) => {
-    const userId = String(editingCollector?.id ?? '');
+    const storedUser = localStorage.getItem('user');
+    const currentUser = storedUser && storedUser !== 'undefined' ? JSON.parse(storedUser) : {};
+    const tenantId = currentUser.tenantId;
+
     if (editingCollector) {
       updateUser.mutate({
-        id: userId,
-        data: {
-          firstName: values.firstName,
-          lastName: values.lastName,
-          userName: values.userName,
-          role: 'Cobrador',
-          email: values.email || null,
-          phone: values.phone || null,
-        },
+        id: editingCollector.id,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        userName: values.userName,
+        role: 'Cobrador',
+        email: values.email || null,
+        phone: values.phone || null,
+        tenantId: editingCollector.tenantId || tenantId,
+        password: 'placeholder',
       }, {
         onSuccess: () => {
           close();
@@ -135,6 +134,7 @@ export const CollectorsList = () => {
         role: 'Cobrador',
         email: values.email || null,
         phone: values.phone || null,
+        tenantId,
       }, {
         onSuccess: () => {
           close();
@@ -159,7 +159,10 @@ export const CollectorsList = () => {
 
   const confirmDelete = () => {
     if (collectorToDelete) {
-      deleteUser.mutate(String(collectorToDelete.id), {
+      deleteUser.mutate({
+        id: collectorToDelete.id,
+        tenantId: collectorToDelete.tenantId,
+      }, {
         onSuccess: () => {
           closeDeleteModal();
           setCollectorToDelete(null);

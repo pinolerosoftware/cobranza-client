@@ -27,7 +27,6 @@ export const loanApplicationInputSchema = z.object({
   dateApproved: z.string().nullable().optional(),
   dateRejected: z.string().nullable().optional(),
   status: z.nativeEnum(StatusLoanApplicationValues),
-  companyId: z.number(),
   currencyId: z.number(),
   active: z.boolean(),
 });
@@ -42,7 +41,6 @@ export const loanApplicationUpdateSchema = z.object({
   dateApproved: z.string().nullable().optional(),
   dateRejected: z.string().nullable().optional(),
   status: z.nativeEnum(StatusLoanApplicationValues).nullable().optional(),
-  companyId: z.number().nullable().optional(),
   currencyId: z.number().nullable().optional(),
   active: z.boolean().nullable().optional(),
 });

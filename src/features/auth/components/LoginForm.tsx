@@ -34,7 +34,7 @@ export function LoginForm() {
   const form = useForm<LoginCredentials>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: '',
+      userName: '',
       password: '',
     },
   });
@@ -155,8 +155,8 @@ export function LoginForm() {
                   placeholder="admin_cobros"
                   size="md"
                   required
-                  {...form.register('username')}
-                  error={form.formState.errors.username?.message}
+                  {...form.register('userName')}
+                  error={form.formState.errors.userName?.message}
                 />
                 
                 <PasswordInput

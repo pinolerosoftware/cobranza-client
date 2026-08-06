@@ -2,14 +2,36 @@ export interface Customer {
   customerId?: number;
   firstName: string;
   lastName: string;
-  dni?: string;
+  dni?: string | null;
   passport?: string | null;
-  email?: string;
-  phone?: string;
-  phoneNumber?: string;
-  address?: string;
+  phone?: string | null;
+  phoneNumber?: string | null;
+  email?: string | null;
+  address?: string | null;
   active: boolean;
-  companyId?: number;
-  createdAt?: string;
-  updatedAt?: string | null;
+  createAt?: string;
+  updateAt?: string | null;
+}
+
+export interface CreateCustomerDTO {
+  firstName?: string;
+  lastName?: string;
+  dni?: string | null;
+  passport?: string | null;
+  phoneNumber?: string | null;
+  email?: string | null;
+  address?: string | null;
+  active?: boolean;
+}
+
+export interface UpdateCustomerDTO {
+  customerId?: number;
+  firstName?: string;
+  lastName?: string;
+  dni?: string | null;
+  passport?: string | null;
+  phoneNumber?: string | null;
+  email?: string | null;
+  address?: string | null;
+  active?: boolean;
 }

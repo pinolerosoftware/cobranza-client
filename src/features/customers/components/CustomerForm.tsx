@@ -17,7 +17,8 @@ import {
   IconMail,
   IconMapPin,
   IconCheck,
-  IconX
+  IconX,
+  IconEPassport
 } from '@tabler/icons-react';
 import { type Customer } from '@/types/customer';
 import { customerSchema, type CustomerFormValues } from '../schemas/customerFormSchema';
@@ -40,7 +41,8 @@ export function CustomerForm({ onSubmit, onCancel, initialData, isEditing = fals
       firstName: initialData?.firstName ?? '',
       lastName: initialData?.lastName ?? '',
       dni: initialData?.dni ?? '',
-      phone: initialData?.phone ?? '',
+      passport: initialData?.passport ?? '',
+      phoneNumber: initialData?.phone || initialData?.phoneNumber || '',
       email: initialData?.email ?? '',
       address: initialData?.address ?? '',
       active: initialData?.active ?? true,
@@ -116,37 +118,54 @@ export function CustomerForm({ onSubmit, onCancel, initialData, isEditing = fals
                 )}
               />
               <Controller
-                name="phone"
+                name="passport"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Pasaporte"
+                    placeholder="Ej. AB1234567"
+                    {...field}
+                    error={errors.passport?.message}
+                    size="md"
+                    radius="md"
+                    leftSection={<IconEPassport size={18} />}
+                  />
+                )}
+              />
+            </Group>
+
+            <Group grow>
+              <Controller
+                name="phoneNumber"
                 control={control}
                 render={({ field }) => (
                   <TextInput
                     label="Teléfono"
                     placeholder="555-123-4567"
                     {...field}
-                    error={errors.phone?.message}
+                    error={errors.phoneNumber?.message}
                     size="md"
                     radius="md"
                     leftSection={<IconPhone size={18} />}
                   />
                 )}
               />
+              <Controller
+                name="email"
+                control={control}
+                render={({ field }) => (
+                  <TextInput
+                    label="Email"
+                    placeholder="correo@ejemplo.com"
+                    {...field}
+                    error={errors.email?.message}
+                    size="md"
+                    radius="md"
+                    leftSection={<IconMail size={18} />}
+                  />
+                )}
+              />
             </Group>
-
-            <Controller
-              name="email"
-              control={control}
-              render={({ field }) => (
-                <TextInput
-                  label="Email (opcional)"
-                  placeholder="correo@ejemplo.com"
-                  {...field}
-                  error={errors.email?.message}
-                  size="md"
-                  radius="md"
-                  leftSection={<IconMail size={18} />}
-                />
-              )}
-            />
           </Stack>
         </Box>
 

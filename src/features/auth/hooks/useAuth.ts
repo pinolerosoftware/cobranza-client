@@ -1,12 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 import { accountService } from '@/services/accountService';
+import { decodeJwtToken } from '@/types/auth';
 import type { LoginCredentials, LoginResponse } from '@/types/auth';
 
-/**
- * Hook to handle login for all roles
- * Includes token storage and user data management
- */
 export const useLogin = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -14,26 +11,34 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: (credentials: LoginCredentials) => accountService.login(credentials),
     onSuccess: (data: LoginResponse) => {
-      // Store auth data
+      const payload = decodeJwtToken(data.token);
+      if (!payload) {
+        console.error('Failed to decode JWT token');
+        return;
+      }
+
+      const user = {
+        id: payload.UserId,
+        userName: payload.UserName,
+        email: payload.Email,
+        role: payload.Role,
+        tenantId: parseInt(payload.TenantId, 10),
+      };
+
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      
-      // Update global user state in Query Cache
-      queryClient.setQueryData(['currentUser'], data.user);
-      
-      // Redirect based on role or to dashboard
-      navigate({ to: '/' });
+      localStorage.setItem('user', JSON.stringify(user));
+      queryClient.setQueryData(['currentUser'], user);
+
+      const isSuperAdmin = user.role === 'SuperAdmin';
+      navigate({ to: isSuperAdmin ? '/superadmin' : '/' });
+
     },
-    onError: (error: any) => {
-      // Errors can be handled by the UI using the mutation state
-      console.error('Login error:', error.response?.data || error.message);
+    onError: (error) => {
+      console.error('Login error:', error);
     },
   });
 };
 
-/**
- * Hook to handle logout
- */
 export const useLogout = () => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();

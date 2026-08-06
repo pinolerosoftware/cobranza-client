@@ -45,14 +45,14 @@ export const CustomersList = () => {
         },
       },
       {
-        accessorKey: 'phone',
+        id: 'phoneNumber',
         header: 'Teléfono',
-        cell: ({ getValue }) => {
-          const phone = getValue<string>();
-          return phone ? (
+        cell: ({ row }) => {
+          const phoneNumber = row.original.phone || row.original.phoneNumber;
+          return phoneNumber ? (
             <Group gap="xs" wrap="nowrap">
               <IconPhone size={14} color="gray" />
-              <Text size="sm">{phone}</Text>
+              <Text size="sm">{phoneNumber}</Text>
             </Group>
           ) : (
             <Text size="sm" c="dimmed">-</Text>
@@ -60,10 +60,10 @@ export const CustomersList = () => {
         },
       },
       {
-        accessorKey: 'email',
+        id: 'email',
         header: 'Email',
-        cell: ({ getValue }) => {
-          const email = getValue<string>();
+        cell: ({ row }) => {
+          const email = row.original.email;
           return email ? (
             <Group gap="xs" wrap="nowrap">
               <IconMail size={14} color="gray" />
@@ -75,10 +75,10 @@ export const CustomersList = () => {
         },
       },
       {
-        accessorKey: 'address',
+        id: 'address',
         header: 'Dirección',
-        cell: ({ getValue }) => {
-          const address = getValue<string>();
+        cell: ({ row }) => {
+          const address = row.original.address;
           return address ? (
             <Group gap="xs" wrap="nowrap">
               <IconMapPin size={14} color="gray" />
