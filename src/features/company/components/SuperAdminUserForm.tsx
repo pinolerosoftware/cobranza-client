@@ -60,7 +60,6 @@ export function SuperAdminUserForm({ onSubmit, onCancel, initialData, isEditing 
       phone: initialData?.phone ?? '',
       companyId: initialData?.companyId ?? initialData?.tenantId ?? 0,
       role: initialData?.role ?? 'Admin',
-      active: initialData?.active ?? true,
     },
   });
 
@@ -251,32 +250,6 @@ export function SuperAdminUserForm({ onSubmit, onCancel, initialData, isEditing 
               </Text>
             )}
           </Stack>
-        </Box>
-
-        <Box>
-          <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">
-            Estado
-          </Text>
-          <Controller
-            name="active"
-            control={control}
-            render={({ field }) => (
-              <Select
-                label="Estado del usuario"
-                placeholder="Seleccione un estado"
-                data={[
-                  { value: 'true', label: 'Activo' },
-                  { value: 'false', label: 'Deshabilitado' },
-                ]}
-                value={field.value ? 'true' : 'false'}
-                onChange={(val) => field.onChange(val === 'true')}
-                size="md"
-                radius="md"
-                withAsterisk
-                allowDeselect={false}
-              />
-            )}
-          />
         </Box>
 
         <Divider />

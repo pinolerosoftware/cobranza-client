@@ -62,7 +62,7 @@ export const CompanyDetail = ({ companyId }: CompanyDetailProps) => {
     [companiesData, companyId]
   );
 
-  const users = usersData?.content || [];
+  const users = (usersData?.content || []).filter((u) => u.active !== false);
 
   const columns = useMemo<ColumnDef<UserResponse>[]>(
     () => [
@@ -75,7 +75,7 @@ export const CompanyDetail = ({ companyId }: CompanyDetailProps) => {
           const fullName = `${u.firstName} ${u.lastName}`;
           return (
             <Group gap="sm">
-              <Avatar size="sm" radius="xl" color={u.active === false ? 'gray' : 'grape'}>
+              <Avatar size="sm" radius="xl" color="grape">
                 {u.firstName[0]}{u.lastName[0]}
               </Avatar>
               <div>
@@ -124,19 +124,6 @@ export const CompanyDetail = ({ companyId }: CompanyDetailProps) => {
           );
         },
       },
-      {
-        id: 'active',
-        header: 'Estado',
-        accessorFn: (row) => row.active,
-        cell: ({ getValue }) => {
-          const active = getValue<boolean | undefined>();
-          return active === false ? (
-            <Badge color="red" variant="light">Deshabilitado</Badge>
-          ) : (
-            <Badge color="teal" variant="light">Activo</Badge>
-          );
-        },
-      },
     ],
     []
   );
@@ -153,7 +140,6 @@ export const CompanyDetail = ({ companyId }: CompanyDetailProps) => {
         email: values.email || null,
         phone: values.phone || null,
         tenantId: companyId,
-        active: values.active,
       }, {
         onSuccess: () => { close(); setEditingUser(null); },
         onError: (error) => console.error('Error updating user:', error),
@@ -168,7 +154,6 @@ export const CompanyDetail = ({ companyId }: CompanyDetailProps) => {
         email: values.email || null,
         phone: values.phone || null,
         tenantId: companyId,
-        active: values.active,
       }, {
         onSuccess: () => { close(); setEditingUser(null); },
         onError: (error) => console.error('Error creating user:', error),
@@ -247,11 +232,11 @@ export const CompanyDetail = ({ companyId }: CompanyDetailProps) => {
                 </Group>
                 {company && (
                   <Badge
-                    color={company.active ? 'teal' : 'gray'}
+                    color="teal"
                     variant="light"
                     size="sm"
                   >
-                    {company.active ? 'Activa' : 'Inactiva'}
+                    Activa
                   </Badge>
                 )}
               </Group>
@@ -302,7 +287,6 @@ export const CompanyDetail = ({ companyId }: CompanyDetailProps) => {
             role: editingUser.role,
             email: editingUser.email ?? undefined,
             phone: editingUser.phone ?? undefined,
-            active: editingUser.active,
             companyId,
           } : { companyId }}
           isEditing={!!editingUser}

@@ -9,7 +9,6 @@ export const superAdminUserSchema = z.object({
   phone: z.string().optional().or(z.literal('')),
   companyId: z.number({ message: 'La empresa es requerida' }).int().positive('La empresa es requerida'),
   role: z.string().min(1, 'El rol es requerido'),
-  active: z.boolean(),
 });
 
 export type SuperAdminUserFormValues = z.infer<typeof superAdminUserSchema>;

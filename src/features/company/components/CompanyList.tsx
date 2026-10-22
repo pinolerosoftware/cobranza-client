@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 import {
-  Badge,
   Stack,
   Button,
   Group,
@@ -39,7 +38,7 @@ export const CompanyList = () => {
   const updateCompany = useUpdateCompany();
   const deleteCompany = useDeleteCompany();
 
-  const companies = companiesData?.content || [];
+  const companies = (companiesData?.content || []).filter((c) => c.active !== false);
 
   const columns = useMemo<ColumnDef<CompanyResponse>[]>(
     () => [
@@ -55,7 +54,7 @@ export const CompanyList = () => {
                 size="lg"
                 radius="xl"
                 variant="light"
-                color={company.active ? 'grape' : 'gray'}
+                color="grape"
               >
                 <IconBarcode size={18} stroke={1.5} />
               </ThemeIcon>
@@ -88,23 +87,6 @@ export const CompanyList = () => {
           );
         },
       },
-      {
-        id: 'active',
-        header: 'Estado',
-        accessorFn: (row) => row.active,
-        cell: ({ getValue }) => {
-          const active = getValue<boolean | undefined>();
-          return active ? (
-            <Badge color="teal" variant="light">
-              Activa
-            </Badge>
-          ) : (
-            <Badge color="gray" variant="light">
-              Inactiva
-            </Badge>
-          );
-        },
-      },
     ],
     []
   );
@@ -116,7 +98,6 @@ export const CompanyList = () => {
           companyId: editingCompany.companyId,
           name: values.name,
           identifier: values.identifier || null,
-          active: values.active,
         },
         {
           onSuccess: () => {
@@ -133,7 +114,6 @@ export const CompanyList = () => {
         {
           name: values.name,
           identifier: values.identifier || null,
-          active: values.active,
         },
         {
           onSuccess: () => {
@@ -168,7 +148,6 @@ export const CompanyList = () => {
         companyId: companyToDelete.companyId,
         name: companyToDelete.name,
         identifier: companyToDelete.identifier ?? null,
-        active: companyToDelete.active,
       });
     }
     closeDeleteModal();
@@ -231,7 +210,6 @@ export const CompanyList = () => {
           initialData={editingCompany ? {
             name: editingCompany.name,
             identifier: editingCompany.identifier ?? undefined,
-            active: editingCompany.active,
           } : undefined}
           isEditing={!!editingCompany}
         />

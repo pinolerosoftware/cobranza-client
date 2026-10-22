@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Badge, Stack, Button, Group, Drawer, Text, Title, Avatar, LoadingOverlay, Paper, Modal } from '@mantine/core';
+import { Stack, Button, Group, Drawer, Text, Title, Avatar, LoadingOverlay, Paper, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { type ColumnDef } from '@tanstack/react-table';
@@ -22,7 +22,7 @@ export const CollectorsList = () => {
   const updateUser = useUpdateUser();
   const deleteUser = useDeleteUser();
 
-  const collectors = collectorsData?.content || [];
+  const collectors = (collectorsData?.content || []).filter((c) => c.active !== false);
 
   const columns = useMemo<ColumnDef<UserResponse>[]>(
     () => [
@@ -34,7 +34,7 @@ export const CollectorsList = () => {
           const name = `${row.original.firstName} ${row.original.lastName}`;
           return (
             <Group gap="sm">
-              <Avatar size="sm" radius="xl" color={row.original.active ? 'teal' : 'gray'}>
+              <Avatar size="sm" radius="xl" color="teal">
                 {row.original.firstName[0]}{row.original.lastName[0]}
               </Avatar>
               <div>
@@ -75,18 +75,6 @@ export const CollectorsList = () => {
           );
         },
       },
-      {
-        id: 'active',
-        header: 'Estado',
-        cell: ({ row }) => {
-          const active = row.original.active;
-          return active ? (
-            <Badge color="teal" variant="light">Activo</Badge>
-          ) : (
-            <Badge color="gray" variant="light">Inactivo</Badge>
-          );
-        },
-      },
     ],
     []
   );
@@ -97,7 +85,6 @@ export const CollectorsList = () => {
     userName: user.userName,
     email: user.email ?? '',
     phone: user.phone ?? '',
-    active: user.active,
   });
 
   const handleSave = (values: CollectorFormValues) => {

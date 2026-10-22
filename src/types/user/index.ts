@@ -9,7 +9,6 @@ export const createUserSchema = z.object({
   role: z.string().min(1, 'El rol es requerido'),
   email: z.string().nullable().optional(),
   phone: z.string().nullable().optional(),
-  active: z.boolean().optional(),
 });
 
 export const updateUserSchema = createUserSchema.partial().extend({

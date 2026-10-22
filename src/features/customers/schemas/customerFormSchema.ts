@@ -8,7 +8,6 @@ export const customerSchema = z.object({
   phoneNumber: z.string().optional().or(z.literal('')),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   address: z.string().optional().or(z.literal('')),
-  active: z.boolean().optional(),
 });
 
 export type CustomerFormValues = z.infer<typeof customerSchema>;

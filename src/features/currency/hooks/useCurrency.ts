@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { currencyService } from '@/services/currencyService';
 
-export const CURRENCY_QUERY_KEY = 'currencies';
+export const CURRENCY_QUERY_KEY = 'currency-list';
 
 export const useCurrencies = () => {
   return useQuery({

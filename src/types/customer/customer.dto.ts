@@ -21,7 +21,6 @@ export interface CreateCustomerDTO {
   phoneNumber?: string | null;
   email?: string | null;
   address?: string | null;
-  active?: boolean;
 }
 
 export interface UpdateCustomerDTO {
@@ -33,5 +32,4 @@ export interface UpdateCustomerDTO {
   phoneNumber?: string | null;
   email?: string | null;
   address?: string | null;
-  active?: boolean;
 }

@@ -4,7 +4,6 @@ import {
   TextInput, 
   Button, 
   Stack, 
-  Select,
   Group,
   Text,
   Box,
@@ -45,7 +44,6 @@ export function CustomerForm({ onSubmit, onCancel, initialData, isEditing = fals
       phoneNumber: initialData?.phone || initialData?.phoneNumber || '',
       email: initialData?.email ?? '',
       address: initialData?.address ?? '',
-      active: initialData?.active ?? true,
     },
   });
 
@@ -184,26 +182,6 @@ export function CustomerForm({ onSubmit, onCancel, initialData, isEditing = fals
                   size="md"
                   radius="md"
                   leftSection={<IconMapPin size={18} />}
-                />
-              )}
-            />
-            
-            <Controller
-              name="active"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  label="Estado del cliente"
-                  placeholder="Seleccione un estado"
-                  data={[
-                    { value: 'true', label: 'Activo' },
-                    { value: 'false', label: 'Inactivo' },
-                  ]}
-                  value={field.value?.toString() ?? 'true'}
-                  onChange={(val) => field.onChange(val === 'true')}
-                  size="md"
-                  radius="md"
-                  withAsterisk
                 />
               )}
             />

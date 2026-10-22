@@ -7,7 +7,6 @@ export const collectorSchema = z.object({
   password: z.string().min(4, 'La contraseña debe tener al menos 4 caracteres').optional(),
   email: z.string().email('Email inválido').optional().or(z.literal('')),
   phone: z.string().optional().or(z.literal('')),
-  active: z.boolean().optional(),
 });
 
 export type CollectorFormValues = z.infer<typeof collectorSchema>;

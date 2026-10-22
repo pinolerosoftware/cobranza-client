@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { LoansList } from '@/features/loans/components/LoansList'
+import { LoanApplicationList } from '@/features/loan-application/components/LoanApplicationList'
 
 export const Route = createFileRoute('/prestamos')({
   component: Prestamos,
@@ -8,7 +8,7 @@ export const Route = createFileRoute('/prestamos')({
 function Prestamos() {
   return (
     <div className="space-y-6">
-      <LoansList />
+      <LoanApplicationList />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Badge, Stack, Button, Group, Drawer, Text, Title, Avatar, LoadingOverlay, Paper, Modal } from '@mantine/core';
+import { Stack, Button, Group, Drawer, Text, Title, Avatar, LoadingOverlay, Paper, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { type ColumnDef } from '@tanstack/react-table';
@@ -21,7 +21,7 @@ export const CustomersList = () => {
   const updateCustomer = useUpdateCustomer();
   const deleteCustomer = useDeleteCustomer();
   
-  const customers = customersData?.content || [];
+  const customers = (customersData?.content || []).filter((c) => c.active !== false);
 
   const columns = useMemo<ColumnDef<Customer>[]>(
     () => [
@@ -33,7 +33,7 @@ export const CustomersList = () => {
           const name = `${row.original.firstName} ${row.original.lastName}`;
           return (
             <Group gap="sm">
-              <Avatar size="sm" radius="xl" color={row.original.active ? 'teal' : 'gray'}>
+              <Avatar size="sm" radius="xl" color="teal">
                 {row.original.firstName[0]}{row.original.lastName[0]}
               </Avatar>
               <div>
@@ -89,18 +89,6 @@ export const CustomersList = () => {
           );
         },
       },
-      {
-        accessorKey: 'active',
-        header: 'Estado',
-        cell: ({ getValue }) => {
-          const active = getValue<boolean>();
-          return active ? (
-            <Badge color="teal" variant="light">Activo</Badge>
-          ) : (
-            <Badge color="gray" variant="light">Inactivo</Badge>
-          );
-        },
-      },
     ],
     []
   );
@@ -122,7 +110,6 @@ export const CustomersList = () => {
     } else {
       createCustomer.mutate({
         ...values,
-        active: true,
       }, {
         onSuccess: () => {
           close();

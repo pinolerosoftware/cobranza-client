@@ -17,12 +17,12 @@ class CompanyService {
   }
 
   async create(data: CompanyInput): Promise<CompanyResponse> {
-    const response = await api.post<ApiResponse<CompanyResponse>>('/Company', data);
+    const response = await api.post<ApiResponse<CompanyResponse>>('/Company', { ...data, active: true });
     return response.data;
   }
 
   async update(data: CompanyInput): Promise<CompanyResponse> {
-    const response = await api.put<ApiResponse<CompanyResponse>>('/Company', data);
+    const response = await api.put<ApiResponse<CompanyResponse>>('/Company', { ...data, active: true });
     return response.data;
   }
 

@@ -19,38 +19,57 @@ export type Frequency = typeof FrequencyValues[keyof typeof FrequencyValues];
 
 export const loanApplicationInputSchema = z.object({
   loanApplicationId: z.number().optional(),
-  customerId: z.number(),
+  customerId: z.number().positive('Debes seleccionar un cliente'),
   frequency: z.nativeEnum(FrequencyValues),
-  amount: z.number(),
-  description: z.string(),
-  dateApplication: z.string(),
+  amount: z.number().positive('El monto debe ser mayor a 0'),
+  description: z.string().min(1, 'La descripción es requerida'),
+  dateApplication: z.string().min(1, 'La fecha de solicitud es requerida'),
   dateApproved: z.string().nullable().optional(),
   dateRejected: z.string().nullable().optional(),
   status: z.nativeEnum(StatusLoanApplicationValues),
-  currencyId: z.number(),
-  active: z.boolean(),
+  currencyId: z.number().positive('Debes seleccionar una moneda'),
 });
 
 export const loanApplicationUpdateSchema = z.object({
   loanApplicationId: z.number(),
-  customerId: z.number().nullable().optional(),
-  frequency: z.nativeEnum(FrequencyValues).nullable().optional(),
-  amount: z.number().nullable().optional(),
-  description: z.string().nullable().optional(),
-  dateApplication: z.string().nullable().optional(),
+  customerId: z.number().positive('Debes seleccionar un cliente').optional(),
+  frequency: z.nativeEnum(FrequencyValues).optional(),
+  amount: z.number().positive('El monto debe ser mayor a 0').optional(),
+  description: z.string().min(1, 'La descripción es requerida').optional(),
+  dateApplication: z.string().min(1, 'La fecha de solicitud es requerida').optional(),
   dateApproved: z.string().nullable().optional(),
   dateRejected: z.string().nullable().optional(),
-  status: z.nativeEnum(StatusLoanApplicationValues).nullable().optional(),
-  currencyId: z.number().nullable().optional(),
-  active: z.boolean().nullable().optional(),
+  status: z.nativeEnum(StatusLoanApplicationValues).optional(),
+  currencyId: z.number().positive('Debes seleccionar una moneda').optional(),
 });
 
 export type LoanApplicationInput = z.infer<typeof loanApplicationInputSchema>;
 export type LoanApplicationUpdate = z.infer<typeof loanApplicationUpdateSchema>;
 
+export interface LoanApplication {
+  loanApplicationId: number;
+  customerId: number;
+  firstName: string;
+  lastName: string;
+  dni: string | null;
+  frequency: Frequency;
+  amount: number;
+  description: string;
+  dateApplication: string;
+  dateApproved: string | null;
+  dateRejected: string | null;
+  status: StatusLoanApplication;
+  currencyId: number | null;
+  currencyCode: string | null;
+  currencyName: string | null;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string | null;
+}
+
 export interface LoanApplicationFilters {
-  Page?: number;
-  Size?: number;
-  Dni?: string;
-  CurrencyId?: number;
+  page?: number;
+  size?: number;
+  dni?: string;
+  currencyId?: number;
 }

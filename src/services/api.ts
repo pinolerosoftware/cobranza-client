@@ -90,7 +90,7 @@ class ApiClient {
     return this.handleResponse<T>(response);
   }
 
-  async delete<T>(endpoint: string, body?: unknown): Promise<T | void> {
+  async delete<T>(endpoint: string, body?: unknown): Promise<T> {
     const url = this.buildUrl(endpoint);
     const token = this.getToken();
 
@@ -102,14 +102,6 @@ class ApiClient {
       },
       body: body ? JSON.stringify(body) : undefined,
     });
-
-    if (response.status === 204 || response.status === 200) {
-      const contentType = response.headers.get('content-type');
-      if (contentType && contentType.includes('application/json')) {
-        await response.json();
-      }
-      return;
-    }
 
     return this.handleResponse<T>(response);
   }

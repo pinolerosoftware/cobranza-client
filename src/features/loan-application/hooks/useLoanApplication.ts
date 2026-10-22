@@ -19,6 +19,9 @@ export const useCreateLoanApplication = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [LOAN_APPLICATION_QUERY_KEY] });
     },
+    onError: (error) => {
+      console.error('Error al crear solicitud:', error);
+    },
   });
 };
 
@@ -30,6 +33,9 @@ export const useUpdateLoanApplication = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [LOAN_APPLICATION_QUERY_KEY] });
     },
+    onError: (error) => {
+      console.error('Error al actualizar solicitud:', error);
+    },
   });
 };
 
@@ -38,6 +44,21 @@ export const useDeleteLoanApplication = () => {
 
   return useMutation({
     mutationFn: (data: LoanApplicationInput) => loanApplicationService.delete(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [LOAN_APPLICATION_QUERY_KEY] });
+    },
+    onError: (error) => {
+      console.error('Error al eliminar solicitud:', error);
+    },
+  });
+};
+
+export const useRejectLoanApplication = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ loanApplicationId, reason }: { loanApplicationId: number; reason?: string }) =>
+      loanApplicationService.reject(loanApplicationId, reason),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [LOAN_APPLICATION_QUERY_KEY] });
     },

@@ -10,7 +10,7 @@ import type {
 
 class UserService {
   private toApiPayload(data: Record<string, unknown>): Record<string, unknown> {
-    const payload = { ...data };
+    const payload: Record<string, unknown> = { ...data, active: true };
     for (const key of Object.keys(payload)) {
       if (payload[key] === '') {
         payload[key] = null;

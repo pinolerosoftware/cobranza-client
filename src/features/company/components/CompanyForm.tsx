@@ -4,7 +4,6 @@ import {
   TextInput,
   Button,
   Stack,
-  Select,
   Group,
   Text,
   Box,
@@ -35,7 +34,6 @@ export function CompanyForm({ onSubmit, onCancel, initialData, isEditing = false
     defaultValues: {
       name: initialData?.name ?? '',
       identifier: initialData?.identifier ?? '',
-      active: initialData?.active ?? true,
     },
   });
 
@@ -89,26 +87,6 @@ export function CompanyForm({ onSubmit, onCancel, initialData, isEditing = false
                   size="md"
                   radius="md"
                   leftSection={<IconBarcode size={18} />}
-                />
-              )}
-            />
-
-            <Controller
-              name="active"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  label="Estado"
-                  placeholder="Seleccione un estado"
-                  data={[
-                    { value: 'true', label: 'Activa' },
-                    { value: 'false', label: 'Inactiva' },
-                  ]}
-                  value={field.value ? 'true' : 'false'}
-                  onChange={(val) => field.onChange(val === 'true')}
-                  size="md"
-                  radius="md"
-                  withAsterisk
                 />
               )}
             />

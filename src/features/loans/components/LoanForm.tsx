@@ -70,7 +70,7 @@ function computeTotals(installments: LoanInstallmentPreview[]) {
     (acc, installment) => ({
       amount: acc.amount + installment.amount,
       capital: acc.capital + installment.capital,
-      interest: acc.interest + installment.inerest,
+      interest: acc.interest + installment.interest,
     }),
     { amount: 0, capital: 0, interest: 0 }
   );
@@ -85,15 +85,17 @@ export function LoanForm({ onClose }: LoanFormProps) {
 
   const customers = customersData?.content || [];
 
-  const customerOptions = customers.map((customer) => {
-    const label = `${customer.firstName} ${customer.lastName}`;
-    const extra = customer.dni ? `DNI: ${customer.dni}` : 'Sin identificación';
-    return {
-      value: String(customer.customerId),
-      label: `${label} (${extra})`,
-      customer,
-    };
-  });
+  const customerOptions = customers
+    .filter((customer) => typeof customer.customerId === 'number')
+    .map((customer) => {
+      const label = `${customer.firstName} ${customer.lastName}`;
+      const extra = customer.dni ? `DNI: ${customer.dni}` : 'Sin identificación';
+      return {
+        value: String(customer.customerId),
+        label: `${label} (${extra})`,
+        customer,
+      };
+    });
 
   const {
     control,
@@ -467,7 +469,7 @@ export function LoanForm({ onClose }: LoanFormProps) {
                           <Table.Td>{new Date(installment.dueDate).toLocaleDateString('es-SV')}</Table.Td>
                           <Table.Td>{formatCurrency(installment.amount)}</Table.Td>
                           <Table.Td>{formatCurrency(installment.capital)}</Table.Td>
-                          <Table.Td>{formatCurrency(installment.inerest)}</Table.Td>
+                          <Table.Td>{formatCurrency(installment.interest)}</Table.Td>
                           <Table.Td>{formatCurrency(installment.remainingBalance)}</Table.Td>
                         </Table.Tr>
                       ))}

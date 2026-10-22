@@ -299,7 +299,7 @@ export function LoansList() {
                           <Table.Td>{new Date(installment.dueDate).toLocaleDateString('es-SV')}</Table.Td>
                           <Table.Td>{formatCurrency(installment.amount)}</Table.Td>
                           <Table.Td>{formatCurrency(installment.capital)}</Table.Td>
-                          <Table.Td>{formatCurrency(installment.inerest)}</Table.Td>
+                          <Table.Td>{formatCurrency(installment.interest)}</Table.Td>
                           <Table.Td>{formatCurrency(installment.remainingBalance)}</Table.Td>
                         </Table.Tr>
                       ))}

@@ -5,7 +5,6 @@ import {
   PasswordInput,
   Button, 
   Stack, 
-  Select,
   Group,
   Text,
   Box,
@@ -43,7 +42,6 @@ export function CollectorForm({ onSubmit, onCancel, initialData, isEditing = fal
       password: '',
       email: initialData?.email ?? '',
       phone: initialData?.phone ?? '',
-      active: initialData?.active ?? true,
     },
   });
 
@@ -173,30 +171,6 @@ export function CollectorForm({ onSubmit, onCancel, initialData, isEditing = fal
               />
             )}
           </Stack>
-        </Box>
-
-        <Box>
-          <Text fw={600} size="sm" mb="xs" c="dimmed" tt="uppercase">Estado</Text>
-          <Controller
-            name="active"
-            control={control}
-            render={({ field }) => (
-              <Select
-                label="Estado del cobrador"
-                placeholder="Seleccione un estado"
-                data={[
-                  { value: 'true', label: 'Activo' },
-                  { value: 'false', label: 'Inactivo' },
-                ]}
-                value={field.value?.toString() ?? 'true'}
-                onChange={(val) => field.onChange(val === 'true')}
-                size="md"
-                radius="md"
-                withAsterisk
-                allowDeselect={false}
-              />
-            )}
-          />
         </Box>
 
         <Divider />
