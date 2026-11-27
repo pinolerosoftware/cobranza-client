@@ -1,0 +1,44 @@
+# Los nombres de servicio coinciden con el Caddyfile:
+#   handle /api/* { reverse_proxy api-prod:8080 }
+#   handle        { reverse_proxy web-prod:8080 }
+services:
+  web-prod:
+    build:
+      context: .
+      args:
+        VITE_API_URL: /api
+    image: cobranza-web:latest
+    restart: unless-stopped
+    networks:
+      - prod
+    # Sin "ports": Caddy lo alcanza por la red interna como web-prod:8080.
+    # Descomenta solo para probar el contenedor sin Caddy:
+    # ports:
+    #   - "8080:8080"
+
+  # api-prod:
+  #   image: tu-backend:latest
+  #   restart: unless-stopped
+  #   networks:
+  #     - prod
+
+  # caddy:
+  #   image: caddy:alpine
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - caddy_data:/data
+  #     - caddy_config:/config
+  #   networks:
+  #     - prod
+
+networks:
+  prod:
+    name: cobranza-prod
+
+# volumes:
+#   caddy_data:
+#   caddy_config:

@@ -1,0 +1,25 @@
+# Dependencias y artefactos (se instalan/generan dentro del contenedor)
+node_modules
+dist
+dist-ssr
+.tanstack
+
+# Git
+.git
+.gitignore
+
+# Entornos (la configuración entra vía --build-arg, nunca copiada)
+.env
+.env.*
+!.env.example
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Otros
+*.log
+.vscode
+.idea
+README.md
